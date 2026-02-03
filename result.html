@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kết quả tìm kiếm - KanSha</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap"/>
+  <script src="https://www.google.com/recaptcha/api.js?render=6LejRV8sAAAAAAS3JKXB0XS7SXjoE6zZuparcJTt"></script>
+  <style>
+    :root {
+      --bg: #121212;
+      --text: #e0e0e0;
+      --search-bg: #1e1e1e;
+      --link: #8ab4f8;
+    }
+    body.light {
+      --bg: #ffffff;
+      --text: #000000;
+      --search-bg: #f0f0f0;
+      --link: #1a73e8;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background:var(--bg);
+      color:var(--text);
+      font-family:'Source Sans Pro',Arial,sans-serif;
+      min-height:100vh;
+      padding:20px;
+      transition:background 0.3s, color 0.3s;
+    }
+    .top-bar { display:flex; align-items:center; justify-content:center; margin-bottom:30px; }
+    .search-bar {
+      width:100%; max-width:600px;
+      background:var(--search-bg);
+      border-radius:50px;
+      padding:12px 20px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.6);
+    }
+    .search-bar input {
+      flex:1; background:transparent; border:none; color:var(--text);
+      font-size:18px; font-weight:600; outline:none;
+    }
+    .mic-icon { font-size:24px; color:#888; cursor:pointer; }
+    .tabs {
+      display:flex; justify-content:center; gap:30px; margin:20px 0;
+      font-size:16px; font-weight:600;
+    }
+    .tab {
+      color:var(--text); cursor:pointer; padding-bottom:8px;
+      border-bottom:3px solid transparent;
+    }
+    .tab.active { border-bottom:3px solid var(--text); }
+    .logo {
+      text-align:center; font-size:60px; font-weight:700;
+      color:var(--text); margin:40px 0 40px; letter-spacing:-2px;
+    }
+    .query-title { text-align:center; font-size:24px; margin:20px 0; color:var(--link); }
+    .results-section { width:100%; height:70vh; border:none; margin-top:20px; }
+    .footer-info {
+      text-align:center; font-size:14px; color:#888; margin-top:20px;
+    }
+    .footer-info a { color:var(--link); text-decoration:none; }
+    .footer-info a:hover { text-decoration:underline; }
+    .settings-btn {
+      position:fixed; top:20px; right:20px; padding:10px 16px;
+      background:#333; color:#fff; border:none; border-radius:20px;
+      cursor:pointer; z-index:1000;
+    }
+    body.light .settings-btn { background:#ddd; color:#000; }
+    @media (max-width:600px) {
+      .logo { font-size:48px; }
+      .search-bar { padding:10px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="settings-btn" onclick="toggleTheme()">Dark / Light</button>
+
+  <div class="top-bar">
+    <div class="search-bar">
+      <form id="searchForm" action="results.html" method="get" style="width:100%; display:flex; align-items:center; gap:12px;">
+        <input type="text" name="q" placeholder="Tìm kiếm trên KanSha..." value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>" required />
+        <input type="hidden" name="g-recaptcha-response" id="recaptchaToken" />
+        <button type="submit" style="background:none; border:none; color:#888; font-size:24px; cursor:pointer;">🔍</button>
+        <span class="mic-icon">🎤</span>
+      </form>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('all')">TẤT CẢ</div>
+    <div class="tab" onclick="showTab('images')">HÌNH ẢNH</div>
+    <div class="tab" onclick="showTab('kids')">KIDS</div>
+    <div class="tab" onclick="showTab('incognito')">INCOGNITO</div>
+    <div class="tab">...</div>
+  </div>
+
+  <div class="logo">KanSha</div>
+
+  <?php
+  $query = htmlspecialchars($_GET['q'] ?? '');
+  if ($query) {
+    echo '<div class="query-title">Kết quả tìm kiếm cho: "' . $query . '"</div>';
+  } else {
+    echo '<div class="query-title">Nhập từ khóa để tìm kiếm</div>';
+  }
+  ?>
+
+  <!-- Startpage là chính: Load iframe ẩn danh -->
+  <?php if ($query): ?>
+    <iframe class="results-section" src="https://www.startpage.com/do/search?q=<?php echo urlencode($query); ?>&language=vietnamese&prf=anonymous" frameborder="0"></iframe>
+  <?php else: ?>
+    <div class="results-section" style="text-align:center; padding:50px;">
+      <p>Nhập từ khóa để bắt đầu tìm kiếm ẩn danh với Startpage</p>
+    </div>
+  <?php endif; ?>
+
+  <div class="footer-info">
+    <p>KanSha 1.0 <a href="https://kansha.wuaze.com/whatnew" target="_blank" rel="noopener noreferrer">What New?</a></p>
+    <p>Security By <span style="color:#8ab4f8; font-weight:bold;">Google Safe Browsing</span> + <span style="color:#8ab4f8; font-weight:bold;">CloudFlare</span></p>
+  </div>
+
+  <script>
+    // Toggle Dark / Light Mode
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+      localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+    }
+
+    // Load theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') document.body.classList.add('light');
+
+    // Chuyển tab
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.getElementById(tabId).style.display = 'block';
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    // reCAPTCHA v3 khi submit
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      grecaptcha.ready(function() {
+        grecaptcha.execute('6LejRV8sAAAAAAS3JKXB0XS7SXjoE6zZuparcJTt', {action: 'search'})
+          .then(function(token) {
+            document.getElementById('recaptchaToken').value = token;
+            document.getElementById('searchForm').submit();
+          })
+          .catch(function(error) {
+            console.error('reCAPTCHA error:', error);
+            alert('Xác thực thất bại, thử lại nhé!');
+          });
+      });
+    });
+  </script>
+
+</body>
+    </html>
